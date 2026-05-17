@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Quicksand:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Quicksand", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "DM Sans", sans-serif;
+
+  --color-primary: #e040a0;
+  --color-primary-container: #f080c0;
+  --color-on-primary-container: #2e1a28;
+  --color-secondary: #7c52aa;
+  --color-secondary-container: #eedcff;
+  --color-tertiary: #0096cc;
+  --color-tertiary-container: #40c0ee;
+  --color-background: #fef7ff;
+  --color-surface-container-low: #fbf2fb;
+  --color-surface-container-high: #f2e8f2;
+  --color-surface-container-highest: #ece2ec;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-primary-container font-sans;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

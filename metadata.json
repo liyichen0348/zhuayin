@@ -1,0 +1,8 @@
+{
+  "name": "爪印 Pawprint",
+  "description": "一个温暖精致的宠物领养平台，连接渴望新伙伴的家庭与可爱的生命。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
