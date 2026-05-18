@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 interface PetCardProps {
   pet: Pet;
   variant?: 'featured' | 'nearby' | 'search';
+  key?: React.Key;
 }
 
 export default function PetCard({ pet, variant = 'nearby' }: PetCardProps) {

@@ -155,3 +155,14 @@ export const markAllNotificationsAsRead = async (username: string) => {
   if (!res.ok || data.error) throw new Error(data.error || '操作失败');
   return data;
 };
+
+export const updateUserAvatar = async (username: string, avatar: string) => {
+  const res = await fetch(`/api/users/${encodeURIComponent(username)}/avatar`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ avatar })
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error || '更新头像失败');
+  return data;
+};

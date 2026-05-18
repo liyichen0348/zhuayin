@@ -44,7 +44,7 @@ function AnimatedRoutes() {
   );
 }
 
-function PageWrapper({ children }: { children: ReactNode }) {
+function PageWrapper({ children }: { children: ReactNode; key?: React.Key }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

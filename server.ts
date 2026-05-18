@@ -1,6 +1,8 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 // 引入类型用于类型推断（假设存在）
 // 为了保证在没有数据库时测试能跑通，引入降级的Mock数据
@@ -10,6 +12,25 @@ dotenv.config();
 
 const app = express();
 const port = 3001;
+
+// 初始化头像持久化存储机制
+const AVATAR_FILE = './user_avatars.json';
+let userAvatars: Record<string, string> = {};
+if (fs.existsSync(AVATAR_FILE)) {
+  try {
+    userAvatars = JSON.parse(fs.readFileSync(AVATAR_FILE, 'utf8'));
+  } catch (e) {
+    console.error('Failed to load user avatars:', e);
+  }
+}
+
+const saveAvatars = () => {
+  try {
+    fs.writeFileSync(AVATAR_FILE, JSON.stringify(userAvatars, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Failed to save user avatars:', e);
+  }
+};
 
 app.use(express.json());
 
@@ -164,9 +185,13 @@ app.get('/api/users', async (req, res) => {
   if (supabase) {
     const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
     if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
+    const mergedData = data.map((u: any) => ({
+      ...u,
+      avatar: userAvatars[u.username] || ''
+    }));
+    return res.json(mergedData);
   }
-  return res.json([{ id: '1', username: '体验用户', email: 'test@example.com', role: 'user' }]);
+  return res.json([{ id: '1', username: '体验用户', email: 'test@example.com', role: 'user', avatar: userAvatars['体验用户'] || '' }]);
 });
 
 // 9. 删除宠物 (Admin)
@@ -225,9 +250,10 @@ app.post('/api/auth/register', async (req, res) => {
       unread: true
     }]);
 
-    return res.json({ success: true, user: data });
+    const mergedUser = { ...data, avatar: userAvatars[username] || '' };
+    return res.json({ success: true, user: mergedUser });
   }
-  return res.json({ success: true, user: { id: Date.now().toString(), username, email, role: 'user' } });
+  return res.json({ success: true, user: { id: Date.now().toString(), username, email, role: 'user', avatar: userAvatars[username] || '' } });
 });
 
 // 13. 用户登录
@@ -236,9 +262,19 @@ app.post('/api/auth/login', async (req, res) => {
   if (supabase) {
     const { data: user, error } = await supabase.from('users').select('*').eq('email', email).eq('password', password).maybeSingle();
     if (error || !user) return res.status(401).json({ error: '邮箱或密码错误' });
-    return res.json({ success: true, user });
+    const mergedUser = { ...user, avatar: userAvatars[user.username] || '' };
+    return res.json({ success: true, user: mergedUser });
   }
-  return res.json({ success: true, user: { id: Date.now().toString(), username: 'admin', email, role: 'admin' } });
+  return res.json({ success: true, user: { id: Date.now().toString(), username: 'admin', email, role: 'admin', avatar: userAvatars['admin'] || '' } });
+});
+
+// 13.5. 更新用户头像 (持久化存入 user_avatars.json)
+app.put('/api/users/:username/avatar', async (req, res) => {
+  const { username } = req.params;
+  const { avatar } = req.body;
+  userAvatars[username] = avatar || '';
+  saveAvatars();
+  return res.json({ success: true, avatar });
 });
 
 // 14. 获取个人通知信息

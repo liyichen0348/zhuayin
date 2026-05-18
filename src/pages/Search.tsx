@@ -1,5 +1,5 @@
 import { Search as SearchIcon, ArrowLeft, MapPin, Heart, PawPrint, SlidersHorizontal } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { fetchPets } from '@/src/lib/api.ts';
 import { Pet } from '@/src/types.ts';
@@ -22,7 +22,44 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState(query);
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // 同步和加载收藏状态
+  useEffect(() => {
+    const syncFavorites = () => {
+      try {
+        const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+        setFavorites(favs);
+      } catch {
+        setFavorites([]);
+      }
+    };
+    syncFavorites();
+    window.addEventListener('favorites-updated', syncFavorites);
+    return () => {
+      window.removeEventListener('favorites-updated', syncFavorites);
+    };
+  }, []);
+
+  const handleLikeToggle = (e: React.MouseEvent, petId: string | number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const petIdStr = petId.toString();
+      let updatedFavs: string[];
+      if (favorites.includes(petIdStr)) {
+        updatedFavs = favorites.filter(id => id !== petIdStr);
+      } else {
+        updatedFavs = [...favorites, petIdStr];
+      }
+      setFavorites(updatedFavs);
+      localStorage.setItem('favorites', JSON.stringify(updatedFavs));
+      window.dispatchEvent(new CustomEvent('favorites-updated'));
+    } catch (err) {
+      console.error('Failed to update favorites:', err);
+    }
+  };
 
   // 当 URL 的 q 参数变化时，同步输入框
   useEffect(() => {
@@ -136,6 +173,17 @@ export default function Search() {
                           {pet.urgent && (
                             <div className="absolute top-2 left-2 bg-primary/90 text-white text-[8px] px-2 py-0.5 rounded-full font-bold">急需领养</div>
                           )}
+                          <button
+                            onClick={(e) => handleLikeToggle(e, pet.id)}
+                            className={cn(
+                              "absolute top-2 right-2 p-1.5 rounded-full transition-all duration-300 shadow-sm z-10",
+                              favorites.includes(pet.id.toString())
+                                ? "bg-white text-red-500 fill-red-500 scale-110"
+                                : "bg-white/40 text-white backdrop-blur-md hover:bg-white/60"
+                            )}
+                          >
+                            <Heart size={14} className={cn(favorites.includes(pet.id.toString()) && "fill-current")} />
+                          </button>
                         </div>
                         <div className="flex-1 p-4 flex flex-col justify-between">
                           <div>
@@ -240,9 +288,17 @@ export default function Search() {
                 <Link key={pet.id} to={`/pet/${pet.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low group active:scale-[0.99] transition-all">
                   <div className="relative h-48">
                     <img src={pet.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                    <div className="absolute top-3 right-3">
-                      <button className="p-2 bg-white/80 backdrop-blur-md rounded-full text-primary shadow-sm">
-                        <Heart size={18} />
+                    <div className="absolute top-3 right-3 z-10">
+                      <button
+                        onClick={(e) => handleLikeToggle(e, pet.id)}
+                        className={cn(
+                          "p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm transition-all duration-300",
+                          favorites.includes(pet.id.toString())
+                            ? "text-red-500 fill-red-500 scale-110 bg-white"
+                            : "text-primary hover:bg-white"
+                        )}
+                      >
+                        <Heart size={18} className={cn(favorites.includes(pet.id.toString()) && "fill-current")} />
                       </button>
                     </div>
                     {pet.urgent && (

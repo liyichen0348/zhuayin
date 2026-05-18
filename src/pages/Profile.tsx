@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { fetchMyAdoptions, fetchPets } from '@/src/lib/api.ts';
+import React, { useState, useEffect, useRef } from 'react';
+import { fetchMyAdoptions, fetchPets, updateUserAvatar } from '@/src/lib/api.ts';
 import { Settings, Verified, LogOut, LogIn, Camera, X, Check, Heart } from 'lucide-react';
 import { cn } from '@/src/lib/utils.ts';
 import { useNavigate } from 'react-router-dom';
@@ -64,11 +64,16 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const handleSelectAvatar = (avatarUrl: string) => {
+  const handleSelectAvatar = async (avatarUrl: string) => {
     const updatedUser = { ...user, avatar: avatarUrl };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setShowAvatarPicker(false);
+    try {
+      await updateUserAvatar(user.username, avatarUrl);
+    } catch (err) {
+      console.error('Failed to update avatar in database:', err);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
