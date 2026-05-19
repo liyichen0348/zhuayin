@@ -347,3 +347,5 @@ app.patch('/api/notifications/read-all', async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Backend Express server running at http://localhost:${port}`);
 });
+export default app;
+
