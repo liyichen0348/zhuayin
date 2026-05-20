@@ -344,8 +344,10 @@ app.patch('/api/notifications/read-all', async (req, res) => {
   return res.json({ success: true });
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Backend Express server running at http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`🚀 Backend Express server running at http://localhost:${port}`);
+  });
+}
 export default app;
 
