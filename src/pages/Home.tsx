@@ -34,11 +34,21 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPets().then(setPets).catch(console.error);
+    setIsLoading(true);
+    fetchPets()
+      .then((data) => {
+        setPets(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoading(false);
+      });
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
@@ -137,7 +147,17 @@ export default function Home() {
         </div>
         <div className="flex gap-6 overflow-x-auto no-scrollbar pb-2 -mx-2 px-2">
           <AnimatePresence mode="popLayout">
-            {filteredPets.filter(p => !p.status).length > 0 ? (
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={`skel-feat-${i}`} className="w-[156px] flex-shrink-0 bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low animate-pulse">
+                  <div className="w-full aspect-[4/3] bg-surface-container-high/50"></div>
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 bg-surface-container-high/50 rounded w-1/2"></div>
+                    <div className="h-3 bg-surface-container-high/50 rounded w-3/4"></div>
+                  </div>
+                </div>
+              ))
+            ) : filteredPets.filter(p => !p.status).length > 0 ? (
               filteredPets.filter(p => !p.status).map(pet => (
                 <motion.div
                   key={pet.id}
@@ -174,7 +194,17 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <AnimatePresence mode="popLayout">
-            {filteredPets.length > 0 ? (
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={`skel-near-${i}`} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low animate-pulse">
+                  <div className="w-full aspect-[4/3] bg-surface-container-high/50"></div>
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 bg-surface-container-high/50 rounded w-1/2"></div>
+                    <div className="h-3 bg-surface-container-high/50 rounded w-3/4"></div>
+                  </div>
+                </div>
+              ))
+            ) : filteredPets.length > 0 ? (
               filteredPets.map(pet => (
                 <motion.div
                   key={pet.id}

@@ -23,21 +23,30 @@ export default function Profile() {
   const [applications, setApplications] = useState<any[]>([]);
   const [favoritePets, setFavoritePets] = useState<Pet[]>([]);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [isLoadingApps, setIsLoadingApps] = useState(true);
+  const [isLoadingFavs, setIsLoadingFavs] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadFavorites = () => {
     try {
       const favs: string[] = JSON.parse(localStorage.getItem('favorites') || '[]');
       if (favs.length > 0) {
+        setIsLoadingFavs(true);
         fetchPets().then(allPets => {
           const filtered = allPets.filter(p => favs.includes(p.id.toString()));
           setFavoritePets(filtered);
-        }).catch(console.error);
+          setIsLoadingFavs(false);
+        }).catch(err => {
+          console.error(err);
+          setIsLoadingFavs(false);
+        });
       } else {
         setFavoritePets([]);
+        setIsLoadingFavs(false);
       }
     } catch {
       setFavoritePets([]);
+      setIsLoadingFavs(false);
     }
   };
 
@@ -47,7 +56,16 @@ export default function Profile() {
       const u = JSON.parse(storedUser);
       setUser(u);
       // 强制使用 username (applicant_name) 拉取，避免因注册手机号和表单填写的手机号不一致导致查不到数据
-      fetchMyAdoptions('', u.username).then(setApplications).catch(console.error);
+      setIsLoadingApps(true);
+      fetchMyAdoptions('', u.username)
+        .then(data => {
+          setApplications(data);
+          setIsLoadingApps(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setIsLoadingApps(false);
+        });
       
       // 加载收藏宠物
       loadFavorites();
@@ -251,7 +269,17 @@ export default function Profile() {
           <h3 className="text-lg font-bold">我的领养记录</h3>
         </div>
         <div className="space-y-3">
-          {applications.length > 0 ? applications.map((app) => (
+          {isLoadingApps ? (
+            Array.from({ length: 2 }).map((_, i) => (
+              <div key={`skel-app-${i}`} className="bg-surface-container-low p-4 rounded-3xl border border-surface-container-high flex items-center gap-4 animate-pulse">
+                <div className="w-16 h-16 rounded-2xl bg-surface-container-high/50 flex-shrink-0"></div>
+                <div className="flex-grow space-y-2">
+                  <div className="h-4 bg-surface-container-high/50 rounded w-1/3"></div>
+                  <div className="h-3 bg-surface-container-high/50 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))
+          ) : applications.length > 0 ? applications.map((app) => (
             <div key={app.id} className="bg-surface-container-low p-4 rounded-3xl border border-surface-container-high flex items-center gap-4 transition-transform active:scale-98">
               <img src={app.pets?.image || 'https://via.placeholder.com/150'} className="w-16 h-16 rounded-2xl object-cover" />
               <div className="flex-grow space-y-0.5">
@@ -294,7 +322,19 @@ export default function Profile() {
           </div>
         </div>
         
-        {favoritePets.length > 0 ? (
+        {isLoadingFavs ? (
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={`skel-fav-${i}`} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low animate-pulse">
+                <div className="w-full aspect-[4/3] bg-surface-container-high/50"></div>
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-surface-container-high/50 rounded w-1/2"></div>
+                  <div className="h-3 bg-surface-container-high/50 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : favoritePets.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
             {favoritePets.map(pet => (
               <PetCard key={pet.id} pet={pet} />

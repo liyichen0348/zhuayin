@@ -11,6 +11,7 @@ export default function AdoptionForm() {
   const location = useLocation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPet, setIsLoadingPet] = useState(false);
   const [pet, setPet] = useState<Pet | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -35,10 +36,15 @@ export default function AdoptionForm() {
     } else {
       const petId = location.state?.petId;
       if (petId) {
+        setIsLoadingPet(true);
         fetchPets().then(pets => {
           const found = pets.find(p => p.id.toString() === petId.toString());
           if (found) setPet(found);
-        }).catch(console.error);
+          setIsLoadingPet(false);
+        }).catch(err => {
+          console.error(err);
+          setIsLoadingPet(false);
+        });
       }
     }
   }, [location.state]);
@@ -118,7 +124,20 @@ export default function AdoptionForm() {
 
         {/* 领养动物的相关信息卡片 */}
         <AnimatePresence>
-          {pet && (
+          {isLoadingPet ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-4 rounded-3xl border border-surface-container-high flex items-center gap-4 mb-6 shadow-sm animate-pulse"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-surface-container-high/50 flex-shrink-0"></div>
+              <div className="flex-grow space-y-2 min-w-0">
+                <div className="w-24 h-4 bg-surface-container-high/50 rounded-full"></div>
+                <div className="w-32 h-5 bg-surface-container-high/50 rounded"></div>
+                <div className="w-40 h-3 bg-surface-container-high/50 rounded"></div>
+              </div>
+            </motion.div>
+          ) : pet ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -135,7 +154,7 @@ export default function AdoptionForm() {
                 <p className="text-xs text-secondary truncate">{pet.breed} • {pet.age} • {pet.gender}</p>
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Form Content */}

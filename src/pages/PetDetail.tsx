@@ -48,7 +48,46 @@ export default function PetDetail() {
     }
   };
 
-  if (!pet) return <div className="min-h-screen bg-background flex items-center justify-center font-bold text-secondary">加载中...</div>;
+  if (!pet) {
+    return (
+      <div className="pb-32 bg-background min-h-screen">
+        <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-surface-container-high w-full">
+          <div className="max-w-lg mx-auto flex justify-between items-center px-6 py-4">
+            <div className="flex items-center gap-2">
+              <button onClick={() => navigate(-1)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors active:scale-90">
+                <ChevronLeft className="text-primary" />
+              </button>
+              <h1 className="text-lg font-bold font-headline text-primary">爪印 Detail</h1>
+            </div>
+          </div>
+        </header>
+        <main className="max-w-lg mx-auto animate-pulse">
+          <section className="px-6 mt-4">
+            <div className="h-[350px] bg-surface-container-high/50 rounded-3xl w-full"></div>
+          </section>
+          <section className="px-6 mt-6 flex justify-between items-end">
+            <div className="space-y-2 w-1/2">
+              <div className="h-8 bg-surface-container-high/50 rounded w-3/4"></div>
+              <div className="h-4 bg-surface-container-high/50 rounded w-1/2"></div>
+            </div>
+            <div className="w-24 h-6 bg-surface-container-high/50 rounded-full"></div>
+          </section>
+          <section className="px-6 mt-6 grid grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-surface-container-high/50 h-16 rounded-2xl"></div>
+            ))}
+          </section>
+          <section className="px-6 mt-8 space-y-4">
+            <div className="h-6 bg-surface-container-high/50 rounded w-1/3"></div>
+            <div className="flex gap-2">
+              <div className="w-16 h-8 bg-surface-container-high/50 rounded-full"></div>
+              <div className="w-16 h-8 bg-surface-container-high/50 rounded-full"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-32 bg-background min-h-screen">

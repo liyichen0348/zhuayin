@@ -238,7 +238,7 @@ export default function Search() {
       )}
 
       {/* ========== 默认发现模式（无搜索关键词时） ========== */}
-      {!isSearchMode && !loading && (
+      {!isSearchMode && (
         <>
           {/* 最近搜索 */}
           <section className="space-y-3">
@@ -284,7 +284,27 @@ export default function Search() {
           <section className="space-y-4">
             <h3 className="text-lg font-bold">为您推荐</h3>
             <div className="grid grid-cols-1 gap-4">
-              {pets.map((pet) => (
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={`skel-rec-${i}`} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low animate-pulse">
+                    <div className="w-full h-48 bg-surface-container-high/50"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div className="w-1/3 h-6 bg-surface-container-high/50 rounded"></div>
+                        <div className="w-1/6 h-4 bg-surface-container-high/50 rounded"></div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-1/4 h-4 bg-surface-container-high/50 rounded"></div>
+                        <div className="w-1/4 h-4 bg-surface-container-high/50 rounded"></div>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-12 h-5 bg-surface-container-high/50 rounded-full"></div>
+                        <div className="w-12 h-5 bg-surface-container-high/50 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : pets.map((pet) => (
                 <Link key={pet.id} to={`/pet/${pet.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-surface-container-low group active:scale-[0.99] transition-all">
                   <div className="relative h-48">
                     <img src={pet.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
